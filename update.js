@@ -106,12 +106,17 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
     return vers;
   }
 
-  function updateExtension(_sPath, _oParsedRef, _sTag) {
+  function updateExtension(_sPath, _oParsedRef, _sTag, _bClean) {
     let out = cp.execSync(util.format("git fetch --tags %s@%s:%s", _oParsedRef.auth, _oParsedRef.host, _oParsedRef.path), { cwd: _sPath });
     console.log(util.format("git fetch: %s", out.toString()));
-    cp.execSync(util.format("git checkout %s", _sTag), { cwd: _sPath });    // I should be able to -f
+    out = cp.execSync(util.format("git checkout %s", _sTag), { cwd: _sPath });    // I should be able to -f
     console.log(util.format("git checkout: %s", out.toString()));
-    cp.execSync(util.format("npm install"), { cwd: _sPath });               // Modern npm will auto-prune.  Do I want to check for older versions?
+    if(_bClean) {
+      out = cp.execSync(util.format("git clean -f"), { cwd: _sPath });    // I should be able to -f
+      console.log(util.format("git clean: %s", out.toString()));
+    }
+    //! And we need to possibly trigger the correct node-gyp scenario
+    out = cp.execSync(util.format("npm install --depth 8"), { cwd: _sPath });               // Modern npm will auto-prune.  Do I want to check for older versions?
   }
 
   function emitFeedback(_sMessage, _oError) {

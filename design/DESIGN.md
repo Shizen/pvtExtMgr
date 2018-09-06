@@ -34,3 +34,10 @@ So, I didn't really think about this before, but `semver` does not deal with pre
 So, let's say, for sake of argument that I want to support auto grabbing and installing prerelease versions, which the more I think about it, the less I think that's wise, but whatever.  Maybe I will only allow it from a specific command extension, but then I'd not want to do it for all extensions I suspect.  Which is exactly where I was going--how do I want to architect it then?  
 
 Apriori we have recognized that most of the time we don't want to use this behavior.  I think it is also clear that we don't to exercise this behavior in a blanket methodology for all the extensions we're managing.  So it needs to be a setting of some sort that we specify for a specific module/extension on a case by case behavior.  The simplest method I can think of is to use an alternate of `#semver:`... like `#semver-prerelease:`.  That means we'd have to set it in the settings, and not be all.. just do it this one time.  I think if I was going to do it as a one-time thing I'd want to execute a command that would let me pick an extension that exists (or maybe enter/pick one) and then enter a custom semver line.  Not necessary for the moment, and requires like.. UI, which I haven't looked at doing in vscode yet.  I digress.
+
+-----
+
+# Dev log
+
+- Ran into an interesting problem with `deasync` and `node-gyp`.  Apparently for some reason, my extension is not building its native extension support code.  This appears to be a "bug" in vscode, in that it's looking for `.node` files in the wrong directory from where `deasync` as put them and deasync is the *first*?!? gypped/native module I've used?!?  Which is possible.  
+  So some research shows me that vscode (which recall is built on electron), uses the `node-bindings` module to search for "native" node-gypped `.node` files.  This module checks in a bunch of places, none of which are where `deasync` puts its gypped files.  More research is required. 
