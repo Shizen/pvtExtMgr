@@ -1,10 +1,16 @@
+/**
+ * @file The `extension.js` file is the base hook-in file for a vscode extension.
+ * @author Shin <shin@shinworks.co>
+ */
+
 // jshint esversion: 6
 
 /**
  * @module pvtExtMgr
- * Private Extension Manager
  * @desc
- * This is a "simple" little extension which leverages `npm`'s `semver` module (and `semver-extra` ;) ) to allow for
+ * # Private Extension Manager
+ * 
+ * This is a "simple" little vscode extension which leverages `npm`'s `semver` module (and `semver-extra` ;) ) to allow for
  * tracking and auto-updating of vscode extensions from private git repos using semver maths.
  */
 let m;  // hax to trick vscode's intellisense
@@ -34,8 +40,6 @@ const util = require('util');
  */
 let extState = {};     // closure scoped like a boss :/
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 function activate(context) {
   context.subscriptions.push(vscode.commands.registerCommand('pvtExtMgr.checkExtensions', function () {
     try {
@@ -77,12 +81,21 @@ function deactivate() {
 exports.deactivate = deactivate;
 
 /**
+ * @desc
+ * This is the work horse/top level entry point for this extension.  We take a list of extensions from the config settings
+ * (the *vscode* settings that is) for this extension, written in a subset of the `npm` dependency format (we only accept
+ * #semver specifications at the moment).  Each extension specified is then updated according to the listed semver rules
+ * (or not if no update is available).
  * @algorithm
+ * 
  * Basically, we find the path to where all the extensions are held (afaik, atm there's only one place that vscode looks)...
+ * 
  * @notes
  * - I am still a little surprised I have permissions.  Some checking to verify I have permissions would be good.
  * - I don't verify that either `git` or `npm` are installed.
  * @param {object} _context The `context` object as passed into `activate()`
+ * @futures
+ * - We could accept a commitish specification as well, would be easy.
  */
 function updateExtensions(_context) {
   // And then the extension mechanics...
@@ -96,35 +109,15 @@ function updateExtensions(_context) {
 
   //- For each extension...
   if(config.get("runAsync")) {
-    // This time using node's built in async stuff
+    // This time using js's built in async stuff
 
     // Promisfy each call 
-
-    // updateAsync().then();
-    const util = require('util');
-    const fs = require('fs');
-
-    const stat = util.promisify(fs.stat);
-
-    async function callStat() {
-      const stats = await stat('.');
-      console.log(`This directory is owned by ${stats.uid}`);
-      return stats.uid;
-    }
-
-    console.log("Async 'launched'");
-
-    callStat().then((r) => {
-      console.log("Async done.");
-    });
-
-    async function makeTheCall(_extName) {
+    async function promiseToUpdate(_extName) {
       return new Promise((resolve, reject) => {
         let updProcess = cp.spawn(util.format("node updateExtension.js %s %s", encodeURI(_extName), encodeURI(extPath), encodeURI(exts[_extName])), { cwd: _context.extensionPath, stdio: "pipe", shell:true });
         updProcess.stdout.on('data', (_data) => {
-          console.log(_data.toString());
+          // console.log(_data.toString());
           // process.stdout.write(_data);
-          // self.out.push(_data.toString().replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, ''));  // stripping control characters
         });
       
         updProcess.stderr.on('data', (_data) => {
@@ -134,16 +127,10 @@ function updateExtensions(_context) {
 
         //- catch completion
         updProcess.on('exit', (_code, _signal) => {
-          updProcess.exitCode = _code;
-          updProcess.signal = _signal;
-          resolve(updProcess);
-          // updProcess.complete = true; // redundent I think
           // vscode.window.showInformationMessage()
+          resolve(updProcess);
         });
         updProcess.on('error', (_err) => {
-          updProcess.error = _err;
-          updProcess.exitCode = _err.status;
-          // updProcess.complete = true;
           vscode.window.showErrorMessage(util.format("PvtExtMgr: Error! (%s)", _err.message));
           reject(_err);
         });
@@ -152,60 +139,13 @@ function updateExtensions(_context) {
 
     let updates = [];
     for (let extName in exts) {
-      updates.push(makeTheCall(extName));
+      // We could push these out in groups to prevent overloading/resource crunches
+      updates.push(promiseToUpdate(extName));
     }
 
     Promise.all(updates).then((r) => {
-      console.log("all done");
+      // console.log("all done");
     });
-      //#region deasync method
-      // let updates = [];
-      // for (let extName in exts) {
-      //     //- kick off update
-      //     // I need extPath and extName
-      //     //?Do I really want to ignore its output?
-      //     // encodeURI to ignore all those pesky cli issues
-      //     let updProcess = cp.spawn(util.format("node updateExtension.js %s %s", encodeURI(extName), encodeURI(extPath), encodeURI(exts[extName])), { cwd: _context.extensionPath, stdio: "pipe", shell:true });
-      //     //- push the cp into my updates collection
-      //     updates.push(updProcess);
-          
-      //     updProcess.stdout.on('data', (_data) => {
-      //         console.log(_data.toString());
-      //         // process.stdout.write(_data);
-      //         // self.out.push(_data.toString().replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, ''));  // stripping control characters
-      //     });
-        
-      //     updProcess.stderr.on('data', (_data) => {
-      //         console.error(_data.toString());
-      //         // process.stderr.write(_data);
-      //     });
-
-      //     //- catch completion
-      //     updProcess.on('exit', (_code, _signal) => {
-      //         updProcess.exitCode = _code;
-      //         updProcess.signal = _signal;
-      //         updProcess.complete = true; // redundent I think
-      //         // vscode.window.showInformationMessage()
-      //     });
-      //     updProcess.on('error', (_err) => {
-      //         updProcess.error = _err;
-      //         updProcess.exitCode = _err.status;
-      //         updProcess.complete = true;
-      //         vscode.window.showErrorMessage(util.format("PvtExtMgr: Error! (%s)", _err.message));
-      //     });
-
-      // }
-      // // use deasync to wait until all of the cp have returned
-      // // It's like parallel, y'all!
-      // require('deasync').loopWhile(function(){
-      //     return updates.reduce((_acc, _cur) => {
-      //         return _acc && _cur.complete;
-      //     }, true);
-      // });
-
-      // // do whatever clean up/notification I might need (none atm)
-      // console.log("I think I'm done", updates);
-      //#endregion
   } else {    // synchronous update
       const update = require('./update.js');
       for (let extName in exts) {

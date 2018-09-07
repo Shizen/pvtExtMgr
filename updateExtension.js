@@ -1,4 +1,7 @@
-
+/**
+ * @file The `updateExtension.js` file provides the `cli` glue for worker thread invocation of the `update` function
+ * @author Shin <shin@shinworks.co>
+ */
 // jshint esversion: 6
 
 
@@ -15,12 +18,4 @@ console.log(util.format("[%s]:%s -> `%s`", extName, source, extPath));
 const update = require('./update.js');
 update(extName, extPath, source);
 
-// console.log(arguments.length);
-// for(var idx = 0; idx < arguments.length; idx++) {
-//   console.log(util.format("[%s]: %s", idx, arguments[idx]));
-// }
-
-// process.argv.forEach((_val, _idx, _arr) => {
-//   console.log(`${_idx} : ${_val}`);
-// });
 

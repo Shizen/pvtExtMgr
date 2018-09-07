@@ -1,0 +1,35 @@
+{
+  "tags": {
+    "allowUnknownTags": true
+  },
+  "plugins": [ "plugins/markdown"],  // , "plugins/summarize", "node_modules/@shizen/shinzen/_plugins/shinmark", "shin-jsdoc-tags.js"
+  "shinmark": {
+    "tags": ["futures", "issues", "notes", "remarks", "algorithm", "changelog" ]
+  },
+  "excludePattern": "(^|\\/|\\\\)",
+  "source": {
+    "exclude": [ "node_modules" ]
+  },
+  "opts": {
+    "template": "node_modules/ink-docstrap/template", //"node_modules/@shizen/shinzen/template",
+    "tutorials" : "design"    // Sadly, we can only specify one directory, so either links or a pre-gen hook is required.
+  },
+  "templates": {
+    "logoFile": "",
+    "cleverLinks": false,
+    "monospaceLinks": false,
+    "dateFormat": "ddd MMM Do YYYY",
+    "outputSourceFiles": true,
+    "outputSourcePath": true,
+    "systemName": "pvtExtMgr",
+    "footer": "",
+    "copyright": "`Private Extension Manager` Copyright © 2018 Shin",
+    "navType": "vertical",
+    "theme": "lumen",
+    "linenums": true,
+    "collapseSymbols": false,
+    "inverseNav": true,
+    "protocol": "html://",
+    "methodHeadingReturns": false
+  }
+}

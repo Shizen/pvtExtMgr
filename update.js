@@ -1,7 +1,31 @@
+/**
+ * @file The `udpate.js` is where the majority of the code for this extension lives.
+ * This file is structured as a module so as to allow the extension to consume it how
+ * it likes based on whether it is executing in syncronous or asyncronous mode.
+ * @author Shin <shin@shinworks.co>
+ */
 
 // jshint esversion:6
 
-
+/**
+ * @module update
+ * @desc
+ * I hesitate to list this as its own module, but technically, that's the way it is defined.
+ * `update` implements the core update features for the private extension update manager.
+ * This module exports a single function which is the `update` function.  The function takes
+ * the information necessary to test the semver information and potentially update one (and only
+ * one) extension.  This function is called multiple times by the `pvtExtMgr` to update all the
+ * extensions on its list.
+ * @param {string} _sExtName The name of the extension (required to match the folder name, which
+ * btw, means that private extensions will not use the version appended naming pattern of public
+ * extensions, which at least makes the distinction quite clear).
+ * @param {string} _sExtPath Fully qualified path to where vscode keeps its extensions (or where
+ * you want the update module to look for extensions, at least).
+ * @param {string} _sSource The information on the git server from which you wish to acquire new
+ * versions of the extension in question.
+ * @param {object} _vscode [Optional] If present, indicates that this function is running on the
+ * server/render thread and can make direct calls back to vscode in order to provide feedback.
+ */
 module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
   const fs = require('fs');
   const path = require('path');
@@ -70,6 +94,16 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
     emitFeedback("Extension not found.");
   }
   
+  /**
+   * @desc
+   * This function will parse the provided string as a URL, returning an object describing its various
+   * components including any specified semver specification.
+   * @notes
+   * This function currently uses `url.parse` to do the basic parsing of the provided string, and will
+   * allow any exceptions thrown by that function to pass through to the caller.
+   * @param {string} _desiredVersion The source string to parse
+   * @returns {object} An object describing the url to the source along with any semver specification.
+   */
   function parseSourceLocVer(_desiredVersion) {
     let parsed = {};
 
@@ -94,8 +128,20 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
     return parsed;
   }
 
-  // We may need the path to grab git credentials
-  // Currently ignoring branch specification
+  /**
+   * @desc 
+   * This function will survey the specified remote repos for available versions, which it returns as an
+   * array of version strings.  Versions are assumed to be stored as tags (lightweight or annotated).  This
+   * function *does not* attempt to filter, validate or disambiguate these tags.
+   * @remarks
+   * - Currently ignoring branch specification (e.g. no commitish support)
+   * - We may need the path to grab git credentials.  If so, I should really isolate any git related code and
+   * route requests through them.
+   * @param {object} _parsedDesiredVersion A parsed url object
+   * @param {string} _sPath The fully qualified path to the extension's directory
+   * @returns {array} An array of tags, including version strings defined on the specified repos.  This list is
+   * not filtered.
+   */
   function getAvailableVersions(_parsedDesiredVersion, _sPath) {
     //git ls-remote --tags
     let versions = cp.execSync(util.format("git ls-remote --tags %s@%s:%s", _parsedDesiredVersion.auth, _parsedDesiredVersion.host, _parsedDesiredVersion.path), { cwd: _sPath });
@@ -106,6 +152,18 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
     return vers;
   }
 
+  /**
+   * @desc
+   * This is the function which performs the actual update.  This is done via a series execSync calls to `git`
+   * and `npm`.
+   * @param {string} _sPath The full qualified path to the extension's directory.
+   * @param {object} _oParsedRef The parsed url.
+   * @param {string} _sTag The version to grab from the repos (assumed to exist).
+   * @param {boolean} _bClean If true, will cause this function to run a `git clean -f` on the extension.
+   * @futures
+   * - This should probably be updated to use the fauxExecSync and quietGitExec utility functions, but for the
+   * `deasync` issue.  @see DESIGN.md
+   */
   function updateExtension(_sPath, _oParsedRef, _sTag, _bClean) {
     let out = cp.execSync(util.format("git fetch --tags %s@%s:%s", _oParsedRef.auth, _oParsedRef.host, _oParsedRef.path), { cwd: _sPath });
     console.log(util.format("git fetch: %s", out.toString()));
@@ -117,8 +175,18 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
     }
     //! And we need to possibly trigger the correct node-gyp scenario
     out = cp.execSync(util.format("npm install --depth 8"), { cwd: _sPath });               // Modern npm will auto-prune.  Do I want to check for older versions?
+    // There may be some node-gyp issues
   }
 
+  /**
+   * @desc
+   * This function encapsulates the feedback channel for `update` to its caller.  If this module
+   * is being run from the render ui/extension thread, then `emitFeedback` will send notifications
+   * directly to vscode & the user.  Otherwise it will send messages to its parent via `stdout` 
+   * and `stderr`.
+   * @param {string} _sMessage The message to emit
+   * @param {object} _oError [Optional] The error object (if any)
+   */
   function emitFeedback(_sMessage, _oError) {
     if(_vscode) {
       if(_oError) {

@@ -1,65 +1,46 @@
-# pvtExtMgr README
+# pvtExtMgr (Private Extension Manager)
 
-This is the README for your extension "pvtExtMgr". After writing up a brief description, we recommend including the following sections.
+The purpose of this extension is to allow you to setup and maintain extensions for your vscode installation which are automatically kept up to date with a "private" git server.  
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- Add an extension with a git + semver rule to your settings for this extension to have `pvtExtMgr` automatically check that repos for the latest matching version of that extension upon command.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+This extension requires that the user already have `git` and `npm` installed and included in their path.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+`pvtExtMgr.extensions`
+:   This is the most important setting for this extension.  This setting lists which extensions you want `pvtExtMgr` to update for you and via which rule.  This setting uses a subset of the `npm` `dependency` format--it will only accept `#semver` rules.  Any other format will be ignored.
+  
+    "pvtExtMgr.extensions": {
+      "jsdoc-view": "git+ssh://git@127.0.0.1:/srv/git/jsdoc-view.git#semver:prerelease",
+      "shinmark": "git+ssh://git@127.0.0.1:/srv/git/shinmark.git#semver:latest",
+      "pvtExtMgr": "git+ssh://git@127.0.0.1:/srv/git/vscExt-pvtExtMgr.git#semver:~0.0.2"
+    }
 
-For example:
+This setting does extend the `#semver` format to add `prerelease` and `latest` as options.  `latest` will follow the standard `dependencies` definition for versioning.  `prerelease` will take the latest version, including prereleases.  These maths are provided courtesy of the `semver-extra` module.
 
-This extension contributes the following settings:
+`pvtExtMgr.runAsync`
+:   If set to true, `pvtExtMgr` will run its extension update tests asynchronously on a number of worker threads and notify you when it is complete.
 
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- Does not verify that the user has permissions to update the extension(s) in question.
+- This module has not been tested on the Mac or Linux (I don't have either setup atm).  Pathing may be dorked on such platforms.
+- I have done no testing for any of the myriad of git security/setups that might be in place.  I use `ssh` with installed keys.
+- Not tested with older versions of npm (only tested with npm 6).
+
+## Futures
+
+- It would be easy to add support for the "commitish" format as well.
+- In async mode, grouping update requests to throttle resource strangling might be nice, if someone ended up "abusing" this extension
+- Settings to allow one to specify a specific git or npm client to use.
+  - Support for custom credentials by extension
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+- 0.0.2 : Initial Release
