@@ -16,6 +16,12 @@ Features
 
 }
 
+#{ Links
+
+- [semver](https://www.npmjs.com/package/semver)
+
+}
+
 # Private Extension Manager
 
 The idea behind this vscode extension is to allow for the management and automatic updating of vscode extensions from one or more private github servers.  To this end, I would have a setting in the extension which would look similar to a package's dependency list (in format), utilizing the github format.  Ideally I'd use the exact same semver math and code as npmm, utilizing the same tagging semantics for githubs in pulling the extensions.
@@ -34,6 +40,10 @@ So, I didn't really think about this before, but `semver` does not deal with pre
 So, let's say, for sake of argument that I want to support auto grabbing and installing prerelease versions, which the more I think about it, the less I think that's wise, but whatever.  Maybe I will only allow it from a specific command extension, but then I'd not want to do it for all extensions I suspect.  Which is exactly where I was going--how do I want to architect it then?  
 
 Apriori we have recognized that most of the time we don't want to use this behavior.  I think it is also clear that we don't to exercise this behavior in a blanket methodology for all the extensions we're managing.  So it needs to be a setting of some sort that we specify for a specific module/extension on a case by case behavior.  The simplest method I can think of is to use an alternate of `#semver:`... like `#semver-prerelease:`.  That means we'd have to set it in the settings, and not be all.. just do it this one time.  I think if I was going to do it as a one-time thing I'd want to execute a command that would let me pick an extension that exists (or maybe enter/pick one) and then enter a custom semver line.  Not necessary for the moment, and requires like.. UI, which I haven't looked at doing in vscode yet.  I digress.
+
+## URL
+
+For compliance, consistancy type considerations, I'm using Node's [url parser](https://nodejs.org/docs/latest-v8.x/api/url.html#url_class_url) to parse setting entries.  All good so far, but may introduce issues later.
 
 -----
 
