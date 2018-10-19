@@ -35,6 +35,7 @@ This setting does extend the `#semver` format to add `prerelease` and `latest` a
 
 ## Known Issues
 
+- Need to improve error handling & reporting, especially in async mode.
 - Does not verify that the user has permissions to update the extension(s) in question.  To be clear, here I mean perms to modify the local file system.
 - This module does not debounce for multiple instances.  By which I mean that it does not deal gracefully with the situation where a user has multiple instances of vscode open and executes an update from each of them at "the same time".
 - When a new version of an extension is loaded, it does not, particularly trigger reloading of that extension in vscode.  Mostly because it's not clear how to get vscode to reload extensions which have already been activated.  Inactive extensions shouldn't need to be reloaded.

@@ -36,9 +36,9 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
   const util = require('util');
 
   let sPath = path.join(_sExtPath, _sExtName);
-  emitFeedback(util.format("update started..."));
+  // emitFeedback(util.format("update started..."));
   if(fs.existsSync(sPath) && fs.statSync(sPath).isDirectory()) {
-    emitFeedback(util.format("extension exists..."));
+    // emitFeedback(util.format("extension exists..."));
     // Other validation?
     //- it has a package.json
     //- it is being tracked by git
@@ -62,7 +62,7 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
     });
 
     if(sourceParsed.semver) {
-      emitFeedback(util.format("checking semver..."));
+      // emitFeedback(util.format("checking semver..."));
       let d;
       if(sourceParsed.semver === "latest") {
         d = semverPre.maxStable(avail);   // I think this works
@@ -167,7 +167,7 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
   function updateExtension(_sPath, _oParsedRef, _sTag, _bClean) {
     let out = cp.execSync(util.format("git fetch --tags %s@%s:%s", _oParsedRef.auth, _oParsedRef.host, _oParsedRef.path), { cwd: _sPath });
     console.log(util.format("git fetch: %s", out.toString()));
-    out = cp.execSync(util.format("git checkout %s", _sTag), { cwd: _sPath });    // I should be able to -f
+    out = cp.execSync(util.format("git checkout %s", _sTag), { cwd: _sPath });
     console.log(util.format("git checkout: %s", out.toString()));
     if(_bClean) {
       out = cp.execSync(util.format("git clean -f"), { cwd: _sPath });    // I should be able to -f
