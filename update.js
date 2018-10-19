@@ -63,27 +63,32 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
 
     if(sourceParsed.semver) {
       // emitFeedback(util.format("checking semver..."));
-      let d;
+      let bestAvailableVersion;
       if(sourceParsed.semver === "latest") {
-        d = semverPre.maxStable(avail);   // I think this works
+        bestAvailableVersion = semverPre.maxStable(avail);   // I think this works
       } else if (sourceParsed.semver === "prerelease") {
-        d = semverPre.max(avail);
+        bestAvailableVersion = semverPre.max(avail);
       } else {
-        d = semver.maxSatisfying(avail, sourceParsed.semver);
+        bestAvailableVersion = semver.maxSatisfying(avail, sourceParsed.semver);
       }
 
-      if(currentVersion !== d && d !== null) {
+      if(currentVersion !== bestAvailableVersion && bestAvailableVersion !== null) {
         // We need to update
-        emitFeedback(util.format("`%s` needs updating... (%s)", _sExtName, d));
+        emitFeedback(util.format("`%s` needs updating... (%s)", _sExtName, bestAvailableVersion), 2, undefined);
         // vscode.window.showInformationMessage(util.format("`%s` needs updating... (%s)", _sExtName, d));
-        updateExtension(sPath, sourceParsed, d);
+        try {
+          updateExtension(sPath, sourceParsed, bestAvailableVersion);
+          emitFeedback(util.format("%s update to %s.", _sExtName, bestAvailableVersion), 1, undefined);
+        } catch(e) {
+          emitFeedback(util.format("An error occured while updating %s.", _sExtName), 1, e);
+        }
       } else {
-        if(d === null) {
-          emitFeedback("", { message: util.format("`%s` does not have any matching version in the indicated repository (%s)", _sExtName, sourceParsed.semver) });
+        if(bestAvailableVersion === null) {
+          emitFeedback("", 1, { message: util.format("`%s` does not have any matching version in the indicated repository (%s)", _sExtName, sourceParsed.semver) });
           // vscode.window.showErrorMessage(util.format("`%s` does not have any matching version in the indicated repository (%s)", _sExtName, sourceParsed.semver));
         } else {
           // up to date, or none available, which maybe should be handled differently?
-          emitFeedback(util.format("`%s` up to date.", _sExtName));
+          emitFeedback(util.format("`%s` up to date.", _sExtName), 1);
           // vscode.window.showInformationMessage(util.format("`%s` up to date.", _sExtName));
         }
       }
@@ -91,7 +96,7 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
       // Do I even allow a non-semver tagged entry?
     }
   } else {
-    emitFeedback("Extension not found.");
+    emitFeedback("Extension not found.", 1);
   }
   
   /**
@@ -185,16 +190,21 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
    * directly to vscode & the user.  Otherwise it will send messages to its parent via `stdout` 
    * and `stderr`.
    * @param {string} _sMessage The message to emit
+   * @param {number} _level The conceptual "warn level" of the feedback.  `1` is a "finalizer" message.  `4` are warnings.
    * @param {object} _oError [Optional] The error object (if any)
+   * @futures I could add a log option here, particularly for the in proc scenario (I might log
+   * out of proc by capturing & logging the consoles).
    */
-  function emitFeedback(_sMessage, _oError) {
+  function emitFeedback(_sMessage, _level, _oError) {
     if(_vscode) {
+      // I'm running "in proc", so I can message directly
       if(_oError) {
         _vscode.window.showErrorMessage(_oError.message);
       } else {
         _vscode.window.showInformationMessage(_sMessage);
       }
     } else {
+      // I'm in a child process.
       if(_oError) {
         console.error(util.format("[%s]:%s", _sExtName, _oError.message));
       } else {

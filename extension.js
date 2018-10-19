@@ -150,6 +150,7 @@ function updateExtensions(_context) {
       const update = require('./update.js');
       for (let extName in exts) {
           try {
+              // update(extName, extPath, exts[extName], config.get("clean"), vscode);
               update(extName, extPath, exts[extName], vscode);
           } catch(e) {
               vscode.window.showErrorMessage(`PvtExtMgr: Error! "${e.message}"`);

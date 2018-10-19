@@ -24,6 +24,11 @@
                     "default": false,
                     "description": "If set to true, pvtExtMgr will kick off each update task asyncronously.  Either way it will inform you when it's done"
                 },
+                "pvtExtMgr.clean": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If set to true, pvtExtMgr will perform a `git clean -f` on each repository"
+                },
                 "pvtExtMgr.extensions": {
                     "type": "object",
                     "default": {},
