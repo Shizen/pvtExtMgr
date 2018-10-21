@@ -1,7 +1,12 @@
 
 Pre-Release checklist
 
+- Refactoring to use progress bar
+  - forcing async
+
+
 - Verify that updates still work with all the refactoring, and that the user is notified when an extension is updated (sanity check)
+  - No
 - Double check that npm modules actually do track versions by tags :/.
 
 # pvtExtMgr (Private Extension Manager)

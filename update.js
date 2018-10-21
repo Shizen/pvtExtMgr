@@ -23,10 +23,9 @@
  * you want the update module to look for extensions, at least).
  * @param {string} _sSource The information on the git server from which you wish to acquire new
  * versions of the extension in question.
- * @param {object} _vscode [Optional] If present, indicates that this function is running on the
- * server/render thread and can make direct calls back to vscode in order to provide feedback.
+ * @param {boolean} _bClean 
  */
-module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
+module.exports = function(_sExtName, _sExtPath, _sSource, _bClean, _iWarnLevel) {
   const fs = require('fs');
   const path = require('path');
   const semver = require('semver');
@@ -35,10 +34,9 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
   const url = require('url');
   const util = require('util');
 
+  _iWarnLevel = _iWarnLevel || 4;
   let sPath = path.join(_sExtPath, _sExtName);
-  // emitFeedback(util.format("update started..."));
   if(fs.existsSync(sPath) && fs.statSync(sPath).isDirectory()) {
-    // emitFeedback(util.format("extension exists..."));
     // Other validation?
     //- it has a package.json
     //- it is being tracked by git
@@ -49,6 +47,8 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
     // Figure out which is installed.
     let currentVersion = cp.execSync("git tag --points-at HEAD", { cwd: sPath });
     currentVersion = currentVersion.toString().trim();  //! Need Error checking.
+    // Note that if one has been playing games the "deployed" commit might not be tagged at all.
+    // this will just cause us to update to the best available.
     let availableVersions = getAvailableVersions(sourceParsed, sPath);
     let avail = [];
     availableVersions.map((line) => {
@@ -62,10 +62,10 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
     });
 
     if(sourceParsed.semver) {
-      // emitFeedback(util.format("checking semver..."));
+      //- Do Semver Maths
       let bestAvailableVersion;
       if(sourceParsed.semver === "latest") {
-        bestAvailableVersion = semverPre.maxStable(avail);   // I think this works
+        bestAvailableVersion = semverPre.maxStable(avail);
       } else if (sourceParsed.semver === "prerelease") {
         bestAvailableVersion = semverPre.max(avail);
       } else {
@@ -75,28 +75,33 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
       if(currentVersion !== bestAvailableVersion && bestAvailableVersion !== null) {
         // We need to update
         emitFeedback(util.format("`%s` needs updating... (%s)", _sExtName, bestAvailableVersion), 2, undefined);
-        // vscode.window.showInformationMessage(util.format("`%s` needs updating... (%s)", _sExtName, d));
         try {
-          updateExtension(sPath, sourceParsed, bestAvailableVersion);
-          emitFeedback(util.format("%s update to %s.", _sExtName, bestAvailableVersion), 1, undefined);
+          let code = updateExtension(sPath, sourceParsed, bestAvailableVersion);
+          if(code === 0) {
+            emitFeedback(util.format("`%s` updated to %s.", _sExtName, bestAvailableVersion), 1, undefined);
+          } else {
+            if(code > 3) {
+              emitFeedback(util.format("`%s` installation incomplete (%s).", _sExtName, code), 1, undefined);
+            } else {
+              emitFeedback(util.format("`%s` update failed (%s).", _sExtName, code), 1, undefined);
+            }
+          }
         } catch(e) {
-          emitFeedback(util.format("An error occured while updating %s.", _sExtName), 1, e);
+          emitFeedback(util.format("An unknown error occured while updating %s.", _sExtName), 1, e);
         }
       } else {
         if(bestAvailableVersion === null) {
-          emitFeedback("", 1, { message: util.format("`%s` does not have any matching version in the indicated repository (%s)", _sExtName, sourceParsed.semver) });
-          // vscode.window.showErrorMessage(util.format("`%s` does not have any matching version in the indicated repository (%s)", _sExtName, sourceParsed.semver));
+          emitFeedback("Semver request unavailable", 1, { message: util.format("`%s` does not have any matching version in the indicated repository (%s)", _sExtName, sourceParsed.semver) });
         } else {
           // up to date, or none available, which maybe should be handled differently?
-          emitFeedback(util.format("`%s` up to date.", _sExtName), 1);
-          // vscode.window.showInformationMessage(util.format("`%s` up to date.", _sExtName));
+          emitFeedback(util.format("`%s` up to date.", _sExtName), 1, undefined);
         }
       }
     } else {
       // Do I even allow a non-semver tagged entry?
     }
   } else {
-    emitFeedback("Extension not found.", 1);
+    emitFeedback("Extension not found.", 1, { message: util.format("No (%s) directory found.  Directory names should match extension name.", sPath) });
   }
   
   /**
@@ -161,26 +166,63 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
    * @desc
    * This is the function which performs the actual update.  This is done via a series execSync calls to `git`
    * and `npm`.
+   * @remarks `out` is pretty useless in general.
    * @param {string} _sPath The full qualified path to the extension's directory.
    * @param {object} _oParsedRef The parsed url.
    * @param {string} _sTag The version to grab from the repos (assumed to exist).
-   * @param {boolean} _bClean If true, will cause this function to run a `git clean -f` on the extension.
+   * @closureParam {boolean} _bClean If true, will cause this function to run a `git clean -f` on the extension.
+   * @returns {number} 0 if the update was successful. 2 if fetch failed (probably bad git repos).  3 for a git checkout 
+   * failure (probably the repos has uncommitted changes).  4 for a git clean failure and 5 for an npm install failure.
    * @futures
    * - This should probably be updated to use the fauxExecSync and quietGitExec utility functions, but for the
-   * `deasync` issue.  @see DESIGN.md
+   * `deasync` issue.  {@link DESIGN }
+   * - Also, we might want to consider bower install option.  This ought not to be necessary because npm has post-install
+   * hooks.  Usage will teach such issues.
    */
-  function updateExtension(_sPath, _oParsedRef, _sTag, _bClean) {
-    let out = cp.execSync(util.format("git fetch --tags %s@%s:%s", _oParsedRef.auth, _oParsedRef.host, _oParsedRef.path), { cwd: _sPath });
-    console.log(util.format("git fetch: %s", out.toString()));
-    out = cp.execSync(util.format("git checkout %s", _sTag), { cwd: _sPath });
-    console.log(util.format("git checkout: %s", out.toString()));
-    if(_bClean) {
-      out = cp.execSync(util.format("git clean -f"), { cwd: _sPath });    // I should be able to -f
-      console.log(util.format("git clean: %s", out.toString()));
+  function updateExtension(_sPath, _oParsedRef, _sTag) {
+    let cmd;
+    try {
+      cmd = util.format("git fetch --tags %s@%s:%s", _oParsedRef.auth, _oParsedRef.host, _oParsedRef.path);
+      cp.execSync(cmd, { cwd: _sPath });
+      emitFeedback("Versions fetched", 4, undefined);
+    } catch(e) {
+      emitFeedback("Error encountered in `git fetch`", 2, e);
+      emitFeedback(util.format("`%s`", cmd), 4, undefined);
+      return 2;
     }
-    //! And we need to possibly trigger the correct node-gyp scenario
-    out = cp.execSync(util.format("npm install --depth 8"), { cwd: _sPath });               // Modern npm will auto-prune.  Do I want to check for older versions?
-    // There may be some node-gyp issues
+    try {
+      cmd = util.format("git checkout %s", _sTag);
+      cp.execSync(cmd, { cwd: _sPath });
+      emitFeedback("Checkout successful", 4, undefined);
+    } catch(e) {
+      emitFeedback("Error encountered in `git checkout`", 2, e);
+      emitFeedback(util.format("`%s`", cmd), 4, undefined);
+      return 3;
+    }
+
+    if(_bClean) {
+      try {
+        cmd = util.format("git clean -f");
+        cp.execSync(cmd, { cwd: _sPath });    // I should be able to -f
+        emitFeedback("Clean operation complete", 4, undefined);
+      } catch(e) {
+        emitFeedback("Error encountered in `git clean`", 2, e);
+        emitFeedback(util.format("`%s`", cmd), 4, undefined);
+        return 4;
+      }
+    }
+
+    try {
+      cmd = util.format("npm install --depth 8");
+      //! And we need to possibly trigger the correct node-gyp scenario
+      cp.execSync(cmd, { cwd: _sPath });               // Modern npm will auto-prune.  Do I want to check for older versions?
+      emitFeedback("npm install complete", 4, undefined);
+      // There may be some node-gyp issues
+    } catch(e) {
+      emitFeedback("Error encountered during `npm install`", 2, e);
+      emitFeedback(util.format("`%s`", cmd), 4, undefined);
+      return 5;
+    }
   }
 
   /**
@@ -192,23 +234,26 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _vscode) {
    * @param {string} _sMessage The message to emit
    * @param {number} _level The conceptual "warn level" of the feedback.  `1` is a "finalizer" message.  `4` are warnings.
    * @param {object} _oError [Optional] The error object (if any)
-   * @futures I could add a log option here, particularly for the in proc scenario (I might log
-   * out of proc by capturing & logging the consoles).
+   * @closureParam {number} _iWarnLevel Used as the threshold for logging.  If the `_level` of the warning is of higher precedence (lower) 
+   * than the `_iWarnLevel`, the message will be emitted.  Otherwise it will be squelched (ignored).
    */
   function emitFeedback(_sMessage, _level, _oError) {
-    if(_vscode) {
-      // I'm running "in proc", so I can message directly
-      if(_oError) {
-        _vscode.window.showErrorMessage(_oError.message);
-      } else {
-        _vscode.window.showInformationMessage(_sMessage);
-      }
-    } else {
+    // if(_vscode) {
+    //   // I'm running "in proc", so I can message directly
+    //   if(_oError) {
+    //     _vscode.window.showErrorMessage(_oError.message);
+    //   } else {
+    //     _vscode.window.showInformationMessage(_sMessage);
+    //   }
+    // } else {
+    
+    if(_level <= _iWarnLevel) {
       // I'm in a child process.
+      // My parent will capture my output and log as desired.
       if(_oError) {
-        console.error(util.format("[%s]:%s", _sExtName, _oError.message));
+        console.error(util.format("{%s}[%s]:%s\n%s", _level, _sExtName, _sMessage, _oError.message));
       } else {
-        console.log(util.format("[%s]:%s", _sExtName, _sMessage));
+        console.log(util.format("{%s}[%s]:%s", _level, _sExtName, _sMessage));
       }
     }
   }
