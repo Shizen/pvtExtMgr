@@ -1,13 +1,11 @@
 
 Pre-Release checklist
 
-- Refactoring to use progress bar
-  - forcing async
-
-
 - Verify that updates still work with all the refactoring, and that the user is notified when an extension is updated (sanity check)
   - No
 - Double check that npm modules actually do track versions by tags :/.
+- Check if we can manually trigger a window reload
+- branch release and dev, clean/purge release
 
 # pvtExtMgr (Private Extension Manager)
 
@@ -16,6 +14,8 @@ The purpose of this extension is to allow you to setup and maintain extensions f
 ## Features
 
 - Add an extension with a git + semver rule to your settings for this extension to have `pvtExtMgr` automatically check that repos for the latest matching version of that extension upon command.
+- I could pretty print my dates more
+- Could put in more detailed progress bar status updates
 
 ## Requirements
 

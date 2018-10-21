@@ -35,6 +35,7 @@ const util = require('util');
  * @const {object} net `nodejs`'s built-in net module.
  */
 const net = require('net');
+const fs = require('fs');
 
 /**
  * @internal
@@ -132,12 +133,38 @@ function updateExtensions(_sExtPath) {
   //- Get the collection of extensions we are supposed to manage.
   let config = vscode.workspace.getConfiguration('pvtExtMgr');
   let keepLog = config.get("keepLog");
+  let log;
+
+  if(keepLog) {
+    try {
+      // Create a log file, or open the same one in case they are just running this back to back
+      let d = new Date(Date.now());
+      let fn = util.format("ext-updates~%s'%s %s-%s-%s.log", d.getHours(), d.getMinutes(), d.getMonth() + 1, d.getDate(), d.getFullYear());
+      console.log(fn);
+      log = fs.createWriteStream(path.join(_sExtPath, fn), { flags: 'a', autoClose: true });
+      log.write(util.format("Private Extensions update started %s:%s on %s-%s-%s\n", d.getHours(), d.getMinutes(), d.getMonth()+1, d.getDate(), d.getFullYear()));
+      // log.on('finish', function() {
+      //   console.log("log: Got finished");
+      // });
+      // log.on('error', function(e) {
+      //   console.log("log: Error", e);
+      // });
+      // log.on('close', function() {
+      //   console.log("log: Close");
+      // });
+    } catch(e) {
+      let msg = vscode.window.showErrorMessage("[pvtExtMgr]: Could not create log file...", e.message);
+      // msg.then() // Ask to continue? -- I don't like showInputBox or quickPick for these, neither is a basic dialog.
+      return new Promise((resolve, reject) => { reject(e); });
+    }
+  }
+
   let exts = config.get("extensions");
 
   function promiseToUpdate(_extName) {
     return new Promise((resolve, reject) => {
       try {
-        console.log(util.format("start %s", _extName));
+        // console.log(util.format("start %s", _extName));
         taskState.progressBar.report({ increment: 100 / taskState.count, message: util.format("Updating %s", _extName) });
         // If I fork, I have to communicate across the channel all the relevant data before kicking off the task...
         // This isn't working at all.
@@ -170,13 +197,21 @@ function updateExtensions(_sExtPath) {
         });
 
         update.on('exit', (_code, _signal) => {
-          console.log(util.format("[%s]: Completed.", _extName));
+          // console.log(util.format("[%s]: Completed.", _extName));
+          if(keepLog) {
+            log.write(util.format("[%s]: Completed.\n", _extName));
+          }
           resolve(_extName);
         });
 
         update.stdout.on('data', (_data) => {
-          console.log(util.format("[%s]: %s", _extName, _data.toString()).trim());
-          //if(keepLog) {}
+          // console.log(util.format("[%s]: %s", _extName, _data.toString()).trim());
+          if(keepLog) {
+            // Interesting that someone is eating my \n here, but not in the above exit log message.
+            // I should maybe encapsulate log writes too
+            log.write(util.format("[%s]: %s\n", _extName, _data.toString()).trim());
+            log.write("\n");
+          }
           // process.stdout.write(_data);
         });
 
@@ -225,11 +260,18 @@ function updateExtensions(_sExtPath) {
       if(_idx < extNames.length) {
         taskState.current = _idx + 1;
         resolve(promiseToUpdate(extNames[_idx]).then((ext) => {
-          console.log(util.format("[%s done so then] : Doing next", ext, _idx+1));
+          console.log(util.format("[%s done so then] : Doing next (idx:%s)", ext, _idx+1));
           return serialize(_idx+1);
         }).catch(e => reject(e)));
       } else {
         console.log("End of chain");
+        if(keepLog) {
+          let d = new Date(Date.now());  
+          // console.log(util.format("Private Extensions update completed %s:%s on %s-%s-%s\n", d.getHours(), d.getMinutes(), d.getMonth()+1, d.getDate(), d.getFullYear()));        
+          log.end(util.format("Private Extensions update completed %s:%s on %s-%s-%s\n", d.getHours(), d.getMinutes(), d.getMonth()+1, d.getDate(), d.getFullYear()));
+          // log.end();
+          // log.close();
+        }
         resolve(_idx);
       }
     });
