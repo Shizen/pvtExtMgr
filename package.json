@@ -2,7 +2,7 @@
     "name": "@shizen/pvtextmgr",
     "displayName": "Private Extension Manager",
     "description": "Private extension manager for vscode",
-    "version": "0.0.2-2",
+    "version": "0.0.2-3",
     "publisher": "shinworks",
     "engines": {
         "vscode": "^1.26.0"
