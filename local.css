@@ -1,0 +1,458 @@
+/* Why is site.lumen setting page-title to white? */
+.page-title, .copyright, .jsdoc-message {
+  color: #333;
+}
+
+.jsdoc-template-filename {
+  color: rgb(199, 37, 78);
+}
+
+.jsdoc-attrib-csl {
+  color: #999;
+  font-variant: small-caps;
+  font-size:0.85em;
+}
+
+.jsdoc-honors-title em {
+  font-style: normal;
+  font-weight: bold;
+}
+
+h3.shinstrap-collapsible[data-hide="true"]+div {
+  display: none;
+}
+h3.shinstrap-collapsible[data-hide="true"]+dl {
+  /* Templates */
+  display:none;
+}
+h3.shinstrap-collapsible[data-hide="false"]::before {
+  display: inline-block;
+  font-family:'Glyphicons Halflings';
+  content: "\e082";
+  vertical-align: -5%;
+  font-size:0.9em;
+}
+h3.shinstrap-collapsible[data-hide="true"]::before {
+  display: inline-block;
+  font-family:'Glyphicons Halflings';
+  content: "\e081";
+  vertical-align: -5%;
+  font-size:0.9em;
+}
+
+fieldset.jsdoc-redirect {
+  margin: 0.5em;
+  padding: 2em;
+  border: 1px dotted #333;
+}
+
+fieldset.jsdoc-redirect[data-hide="true"] * {
+  display: none;
+}
+
+fieldset.jsdoc-redirect[data-hide="false"] * {
+  /* Not none */
+}
+
+fieldset.jsdoc-redirect[data-hide] legend {
+  display: inline-block;
+  border: 0;
+  font-size: 1.1em;
+  width: initial;
+  margin: 0;
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+}
+
+fieldset.jsdoc-redirect[data-hide] legend>span {
+  display: initial;
+  vertical-align: -5%;
+}
+
+fieldset.jsdoc-redirect[data-hide="false"] legend>span::before {
+  display: initial;
+  font-family:'Glyphicons Halflings';
+  content: "\e082"
+}
+fieldset.jsdoc-redirect[data-hide="true"] legend>span::before {
+  display: initial;
+  font-family:'Glyphicons Halflings';
+  /* content: "\2b"; */
+  content: "\e081";
+}
+
+fieldset.jsdoc-redirect hr {
+  display: none;
+}
+
+.md mark {
+  color: inherit;
+  background-color: inherit;
+}
+
+.md ul, .md ol {
+  padding-top: 0.1em;
+  margin-left: 40px;
+  margin-bottom: 1.1em;
+}
+
+.md ul ul, .md ol ol {
+  padding-top: 0.1em;
+}
+
+.md p {
+  padding-bottom: 0.5em;
+}
+
+.md li p {
+  padding-bottom: 0em;
+}
+
+.md li p + p {
+  padding-top: 0.25em;
+}
+
+.md li p + p + p {
+  padding-top: 0.35em;
+}
+
+.md hr {
+  margin-top: 0.25em;
+  margin-bottom: 0.75em;
+}
+
+.md h1 {
+  padding-top: 0.2em;
+  padding-bottom: 0.25em;
+}
+
+.md h2 {
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+}
+
+.md h3 {
+  padding-top: 0.1em;
+  padding-bottom: 0.2em;
+}
+
+.md h4 {
+  padding-top: 0.1em;
+  padding-bottom: 0.2em;
+}
+
+.md h5 {
+  padding-top: 0.1em;
+  padding-bottom: 0.2em;
+}
+
+.md pre {
+  padding: 0.25em;
+  margin: 0.5em;
+  /* background-color: @backgroundOffsetColor; */
+}
+
+code {
+  /* background-color: @backgroundOffsetColor; */
+}
+
+/* .md code.file {
+  background-color: fadeout(@backgroundOffsetColor, 25%);
+  color: mix(black, @backgroundOffsetColor, 50%);  // basically same as fadeout
+} */
+
+.md details {
+  padding-bottom: 0.5em;
+  cursor: pointer;
+}
+
+.md table {
+  /* border: 1px solid @backgroundOffsetColor;   */
+}
+
+.md td {
+  /* border: 1px dashed @backgroundOffsetColor; */
+}
+
+.md dd {
+  font-style: italic;
+  font-size: 0.9em;
+}
+
+.md dt {
+  font-weight: 600;
+}
+
+
+.md .shinmark-callout-warning {
+  /* background-color: @hiliteColor; */
+  padding-left: 0.4em;
+  border-radius: 0.25em;
+  margin: 0.25em;
+  margin-top: .75em;
+  margin-bottom: .75em;
+  padding-top: 0.25em;
+  padding-bottom: 0.1em;
+}
+
+.md .shinmark-callout-warning:before {
+  font-family: FontAwesome;
+  content: "\f06a";
+  padding-right: 0.2em;
+}
+
+.md .shinmark-callout-warning:after {
+  font-family: FontAwesome;
+  content: "\f06a";
+  padding-top: 1px;
+  padding-left: 0.2em;
+  padding-right: 0.4em;
+  float: right;
+}
+
+.md .callout-question {
+  /* background-color: @backgroundOffsetColor; */
+  padding-left: 0.3em;
+  /* border: 1px dotted @constructionColor; */
+  margin: 0.5em;
+  border-radius: 1em;
+  padding-top: 0.15em;
+  padding-bottom: 0.1em;
+}
+
+.md .callout-question:before {
+  font-family: FontAwesome;
+  content: "\f29c";
+}
+
+.md .callout-question:after {
+  font-family: FontAwesome;
+  content: "\f29c";
+  padding-top: 1px;
+  padding-right: 0.3em;
+  float: right;
+}
+
+.md .shinmark-sidebar .title {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+.md .shinmark-sidebar {
+  position: relative;
+  left: 1.5em;
+  /* background-color: @backgroundOffsetColor; */
+  /* border: 3px double @constructionBorderColor; */
+  float: right;
+  padding: 1em;
+  border-radius: 0.25em;
+  width: 40%;
+  clear: both;
+  margin-bottom: 1em;
+}
+
+.md .framebox-example {
+  display: flow-root;
+  font-style: italic;
+  /* background-color: @backgroundOffsetColor; */
+  border-width: 3px;
+  border-style: outset;
+  margin: 1em;
+  padding: 0.4em;
+  padding-bottom: 0.1em;
+}
+
+#inline-expansion-example {
+  display:none;
+}
+
+.inline-expandable {
+  font-weight:bold;
+  /* color: @colorSpecial; */
+  cursor: help;
+}
+
+.inline-expandable:active #inline-expansion-example {
+  display: inline-block;
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+  /* outline: 1px dashed @constructionColor; */
+  /* background-color: @backgroundOffsetColor;
+  color: @constructionColor; */
+}
+
+
+.question {
+  font-style: italic;
+}
+
+.question:before {
+  font-style: normal;
+  font-family: FontAwesome;
+  /* // padding-left:0.1em; */
+  padding-right: 0.2em;
+  content: "\f29c";
+}
+
+.response {
+  padding-left: 0.25em;
+  font-style:normal;
+  color: red;
+}
+
+.response:before {
+  content: "--";
+}
+
+
+
+li.questionable {
+  list-style:none;
+  position: relative;
+  left: -0.85em;
+}
+li.questionable:before {
+  font-family: FontAwesome;
+  font-size:0.45em;
+  content: "\f059";
+  vertical-align: middle;
+  padding-right:1em;
+}  
+
+li.questionable-o {
+  list-style:none;
+  position: relative;
+  left: -0.85em;
+}
+li.questionable-o:before {
+  font-family: FontAwesome;
+  font-size:0.45em;
+  content: "\f29c";
+  vertical-align: middle;
+  padding-right:1em;
+}
+
+
+.keypress {
+  background-color: white;
+  /* border: 1px solid @constructionColor; */
+  padding: 0.1em;
+  padding-left: 0.25em;
+  padding-right: 0.35em;
+  border-radius: 0.45em;
+}
+
+
+details.collapsible-note {
+  padding-left: 0.2em;
+  /* background-color: @backgroundOffsetColor; */
+  /* color: @constructionColor; */
+  border-radius: 3px;
+}
+
+details.collapsible-note summary {
+  font-style: italic;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+details.collapsible-note p {
+  text-indent: 0.25em;
+  font-size: 0.8em;
+}
+
+
+
+.md .test-ui-collapsible[data-hidden='true']+div {
+  display: none;
+}
+
+.md .test-ui-collapsible[data-hidden='false']+div {
+  display: block;
+}
+
+.md .test-ui-collapsible[data-hidden='true']:before {
+  font-family: FontAwesome;
+  font-size: 0.85em;
+  content: "\f0da";
+  vertical-align: middle;
+  padding-right:1em;
+}
+
+.md .test-ui-collapsible[data-hidden='false']:before {
+  font-family: FontAwesome;
+  font-size: 0.85em;
+  content: "\f0d7";
+  vertical-align: middle;
+  padding-right:1em;
+}
+
+
+.md .example {
+  margin: 4%;
+  width: 92%;
+  padding: 1em;
+  border: 3px ridge;
+  border-radius: 5px;
+  opacity: 0.8;
+}
+
+.md .test-red {
+  color: red;
+}
+
+.md table.headless thead {
+  display: none;
+}
+
+.md .nobreak {
+  white-space: nowrap;
+}
+
+.md .right {
+  text-align: right;
+  font-variant: small-caps;
+}
+
+.md .attributes-block td {
+  padding-left: 1em;
+  padding-right: 1em;
+  min-width: 40px;
+}
+
+.md .descriptors td {
+  padding-left: 1em;
+  padding-right: 1em;
+  min-width: 40px;
+}
+
+.md .tag-topic {
+
+}
+
+.md .tag-topic::before {
+  content: "<hr>"; 
+  margin-left: 5%;
+  width: 90%;
+  margin-top: 0.3em;
+  margin-bottom: 0.3em;
+  opacity: 0.5;
+}
+
+
+
+.topic .specific {
+  margin-left: 5%;
+  width: 90%;
+  margin-top: 0.3em;
+  margin-bottom: 0.3em;
+  opacity: 0.5;
+}
+.topic .specific.bottom {
+  margin-bottom: 0.75em;
+}
+
+div.topic div.label {
+  margin-left: 5%;
+  text-indent: 1em;
+}

@@ -2,7 +2,7 @@
   "tags": {
     "allowUnknownTags": true
   },
-  "plugins": [ "plugins/markdown"],  // , "plugins/summarize", "node_modules/@shizen/shinzen/_plugins/shinmark", "shin-jsdoc-tags.js"
+  "plugins": [ "node_modules/@shizen/jsdoc-tags/shin-jsdoc-tags.js", "node_modules/@shizen/jsdoc-shinmark/shinmark" ],  // , "plugins/summarize"
   "shinmark": {
     "tags": ["futures", "issues", "notes", "remarks", "algorithm", "changelog" ]
   },
@@ -11,8 +11,8 @@
     "exclude": [ "node_modules" ]
   },
   "opts": {
-    "template": "node_modules/ink-docstrap/template", //"node_modules/@shizen/shinzen/template",
-    "tutorials" : "design"    // Sadly, we can only specify one directory, so either links or a pre-gen hook is required.
+    "template": "node_modules/@shizen/shinstrap/template",
+    "tutorials" : "design" 
   },
   "templates": {
     "logoFile": "",
@@ -30,6 +30,7 @@
     "collapseSymbols": false,
     "inverseNav": true,
     "protocol": "html://",
-    "methodHeadingReturns": false
+    "methodHeadingReturns": false,
+    "supplementalCSS": "local.css"
   }
 }

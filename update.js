@@ -16,6 +16,14 @@
  * the information necessary to test the semver information and potentially update one (and only
  * one) extension.  This function is called multiple times by the `pvtExtMgr` to update all the
  * extensions on its list.
+ * 
+ * #{ Test
+ *  - What happens when I do this?
+ * }
+ * 
+ * ! Or This?!?
+ * 
+ * I am getting *normal* markdown, but not shinmark.  Why?
  * @param {string} _sExtName The name of the extension (required to match the folder name, which
  * btw, means that private extensions will not use the version appended naming pattern of public
  * extensions, which at least makes the distinction quite clear).
@@ -79,6 +87,7 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _bClean, _iWarnLevel) 
           let code = updateExtension(sPath, sourceParsed, bestAvailableVersion);
           if(code === 0) {
             emitFeedback(util.format("`%s` updated to %s.", _sExtName, bestAvailableVersion), 1, undefined);
+            process.exit(-1); // A bit of a hax
           } else {
             if(code > 3) {
               emitFeedback(util.format("`%s` installation incomplete (%s).", _sExtName, code), 1, undefined);

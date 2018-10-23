@@ -75,13 +75,24 @@ function activate(context) {
       }, (_oProgress, _oToken) => {
         return new Promise((resolve, reject) => {
           _oToken.onCancellationRequested(() => {
+            // cancel 
             taskState.taskComplete();
             console.log("Cancelled by user request");
+            reject({ message: "Cancelled by user request" });
           });
           taskState.progressBar = _oProgress;
-          return updateExtensions(context.extensionPath).then((r) => {
+          return updateExtensions(context.extensionPath).then((updated) => {
             taskState.taskComplete();
-            resolve(r);
+            if(updated) {
+              vscode.window.showInformationMessage("One or more extensions have been updated", "Reload", "Cancel").then((resp) => {
+                vscode.window.showInformationMessage(util.format("Inception!! %s", resp));
+                if(resp === "Reload") {
+                  // reload extensions
+                  vscode.commands.executeCommand("workbench.action.reloadWindow");
+                }
+              });
+            }
+            resolve(updated);
           }).catch((e) => {
             console.log("Error", e);
             reject(e);
@@ -196,12 +207,12 @@ function updateExtensions(_sExtPath) {
           // console.log("update closed.");
         });
 
-        update.on('exit', (_code, _signal) => {
+        update.on('exit', (_code) => {
           // console.log(util.format("[%s]: Completed.", _extName));
           if(keepLog) {
             log.write(util.format("[%s]: Completed.\n", _extName));
           }
-          resolve(_extName);
+          resolve(_code === -1? true : false);
         });
 
         update.stdout.on('data', (_data) => {
@@ -255,31 +266,42 @@ function updateExtensions(_sExtPath) {
   taskState.count = extNames.length + 1;
 
   // There's probably an easier way to do this than my hand built iterator... 
-  function serialize(_idx) {
+  function serialize(_idx, _updAggregate) {
     return new Promise((resolve, reject) => {
-      if(_idx < extNames.length) {
-        taskState.current = _idx + 1;
-        resolve(promiseToUpdate(extNames[_idx]).then((ext) => {
-          console.log(util.format("[%s done so then] : Doing next (idx:%s)", ext, _idx+1));
-          return serialize(_idx+1);
-        }).catch(e => reject(e)));
+      if(taskState.inProgress !== true) {
+        reject({ message: "Task no longer in progress" });
       } else {
-        console.log("End of chain");
-        if(keepLog) {
-          let d = new Date(Date.now());  
-          // console.log(util.format("Private Extensions update completed %s:%s on %s-%s-%s\n", d.getHours(), d.getMinutes(), d.getMonth()+1, d.getDate(), d.getFullYear()));        
-          log.end(util.format("Private Extensions update completed %s:%s on %s-%s-%s\n", d.getHours(), d.getMinutes(), d.getMonth()+1, d.getDate(), d.getFullYear()));
-          // log.end();
-          // log.close();
+        if(_idx < extNames.length) {
+          taskState.current = _idx + 1;
+          resolve(promiseToUpdate(extNames[_idx]).then((updated) => {
+            if(updated) {
+              console.log("%s was updated.", extNames[_idx]);
+            }
+            // console.log(util.format("[%s done so then] : Doing next (idx:%s)", ext, _idx+1));
+            let d = Date.now();
+            while(Date.now()-d < 1000) {
+              // Do nothing.  We're waiting.
+            }
+            return serialize(_idx+1, updated || _updAggregate);
+          }).catch(e => reject(e)));
+        } else {
+          console.log("End of chain");
+          if(keepLog) {
+            let d = new Date(Date.now());  
+            // console.log(util.format("Private Extensions update completed %s:%s on %s-%s-%s\n", d.getHours(), d.getMinutes(), d.getMonth()+1, d.getDate(), d.getFullYear()));        
+            log.end(util.format("Private Extensions update completed %s:%s on %s-%s-%s\n", d.getHours(), d.getMinutes(), d.getMonth()+1, d.getDate(), d.getFullYear()));
+            // log.end();
+            // log.close();
+          }
+          resolve(_updAggregate);
         }
-        resolve(_idx);
       }
     });
   }
 
   // return p.then(() => { return serialize(0); });
   
-  return serialize(0);
+  return serialize(0, false);
   
   // .then(() => { 
   //   return new Promise(
