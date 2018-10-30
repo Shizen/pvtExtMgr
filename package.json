@@ -3,9 +3,9 @@
     "displayName": "Private Extension Manager",
     "description": "Private extension manager for vscode--update extensions from private git servers",
     "keywords": [
-      "extensionManager"
+        "extensionManager"
     ],
-    "version": "0.0.2-5",
+    "version": "0.0.2-6",
     "publisher": "shinworks",
     "author": {
         "name": "Sean Simmons",
@@ -28,8 +28,8 @@
         "onCommand:pvtExtMgr.checkExtensions"
     ],
     "repository": {
-      "type": "git",
-      "url": "https://github.com/Shizen/pvtExtMgr"
+        "type": "git",
+        "url": "https://github.com/Shizen/pvtExtMgr"
     },
     "main": "./extension",
     "contributes": {
