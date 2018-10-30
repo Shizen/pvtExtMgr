@@ -1,8 +1,84 @@
-/**
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>pvtExtMgr Source: update.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.lumen.css">
+	<link type="text/css" rel="stylesheet" href="styles/supplemental.css">
+	
+		<link type="text/css" rel="stylesheet" href="styles/local.css">
+	
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">pvtExtMgr</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-pvtExtMgr.html">pvtExtMgr</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+    
+            <h1 class="page-title">Source: update.js</h1>
+        
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">/**
  * @file The `udpate.js` is where the majority of the code for this extension lives.
  * This file is structured as a module so as to allow the extension to consume it how
  * it likes based on whether it is executing in syncronous or asyncronous mode.
- * @author Shin <shin@shinworks.co>
+ * @author Shin &lt;shin@shinworks.co>
  */
 
 // jshint esversion:6
@@ -17,6 +93,14 @@
  * the information necessary to test the semver information and potentially update one (and only
  * one) extension.  This function is called multiple times by the `pvtExtMgr` to update all the
  * extensions on its list.
+ * 
+ * #{ Test
+ *  - What happens when I do this?
+ * }
+ * 
+ * ! Or This?!?
+ * 
+ * I am getting *normal* markdown, but not shinmark.  Why?
  * @param {string} _sExtName The name of the extension (required to match the folder name, which
  * btw, means that private extensions will not use the version appended naming pattern of public
  * extensions, which at least makes the distinction quite clear).
@@ -24,12 +108,7 @@
  * you want the update module to look for extensions, at least).
  * @param {string} _sSource The information on the git server from which you wish to acquire new
  * versions of the extension in question.
- * @param {boolean} _bClean If true will cause this function to execute a `git clean -f` on the
- * repos if updated.
- * @param {number} _iWarnLevel Indicates what level of warnings should be emitted by this function.
- * (Although beyond the scope of this module, its client--`vscExt-pvtExtMgr` will drop all messages
- * on the floor unless logging is specified.  If logging is specified, this parameter will dictate
- * what messages actually get logged).
+ * @param {boolean} _bClean 
  */
 module.exports = function(_sExtName, _sExtPath, _sSource, _bClean, _iWarnLevel) {
   const fs = require('fs');
@@ -42,7 +121,7 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _bClean, _iWarnLevel) 
 
   _iWarnLevel = _iWarnLevel || 4;
   let sPath = path.join(_sExtPath, _sExtName);
-  if(fs.existsSync(sPath) && fs.statSync(sPath).isDirectory()) {
+  if(fs.existsSync(sPath) &amp;&amp; fs.statSync(sPath).isDirectory()) {
     // Other validation?
     //- it has a package.json
     //- it is being tracked by git
@@ -62,7 +141,7 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _bClean, _iWarnLevel) 
       p = p[p.length-1];
       p = p.match(/refs\/tags\/(.+)\^\{\}/);
       // if(/refs\/tags\/.+\^\{\}/.test(p)) {      // Why bother to test at this point?
-      if(p !== null && p.length > 1) {
+      if(p !== null &amp;&amp; p.length > 1) {
         avail.push(p[1]);
       }
     });
@@ -78,7 +157,7 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _bClean, _iWarnLevel) 
         bestAvailableVersion = semver.maxSatisfying(avail, sourceParsed.semver);
       }
 
-      if(currentVersion !== bestAvailableVersion && bestAvailableVersion !== null) {
+      if(currentVersion !== bestAvailableVersion &amp;&amp; bestAvailableVersion !== null) {
         // We need to update
         emitFeedback(util.format("`%s` needs updating... (%s)", _sExtName, bestAvailableVersion), 2, undefined);
         try {
@@ -236,7 +315,7 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _bClean, _iWarnLevel) 
    * @desc
    * This function encapsulates the feedback channel for `update` to its caller.  If this module
    * is being run from the render ui/extension thread, then `emitFeedback` will send notifications
-   * directly to vscode & the user.  Otherwise it will send messages to its parent via `stdout` 
+   * directly to vscode &amp; the user.  Otherwise it will send messages to its parent via `stdout` 
    * and `stderr`.
    * @param {string} _sMessage The message to emit
    * @param {number} _level The conceptual "warn level" of the feedback.  `1` is a "finalizer" message.  `4` are warnings.
@@ -254,7 +333,7 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _bClean, _iWarnLevel) 
     //   }
     // } else {
     
-    if(_level <= _iWarnLevel) {
+    if(_level &lt;= _iWarnLevel) {
       // I'm in a child process.
       // My parent will capture my output and log as desired.
       if(_oError) {
@@ -266,3 +345,141 @@ module.exports = function(_sExtName, _sExtPath, _sSource, _bClean, _iWarnLevel) 
   }
 };
 
+</pre>
+    </article>
+</section>
+
+    
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	`Private Extension Manager` Copyright © 2018 Shin
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
+	
+		on Tue Oct 23rd 2018
+	
+	using the <a href="https://github.com/Shizen/shinstrap">shinstrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/shinstrap.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

@@ -1,18 +1,93 @@
-/**
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>pvtExtMgr Source: extension.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.lumen.css">
+	<link type="text/css" rel="stylesheet" href="styles/supplemental.css">
+	
+		<link type="text/css" rel="stylesheet" href="styles/local.css">
+	
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">pvtExtMgr</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-pvtExtMgr.html">pvtExtMgr</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+    
+            <h1 class="page-title">Source: extension.js</h1>
+        
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">/**
  * @file The `extension.js` file is the base hook-in file for a vscode extension.
- * @author Shin <shin@shinworks.co>
+ * @author Shin &lt;shin@shinworks.co>
  */
 
 // jshint esversion: 6
 
 /**
  * @module pvtExtMgr
- * @public
  * @desc
  * # Private Extension Manager
  * 
  * This vscode extension facilitates the use/maintenance of private extensions in vscode.  This module leverages 
- * `npm`'s [`semver`](https://www.npmjs.com/package/semver) module (and [`semver-extra`](https://www.npmjs.com/package/semver-extra))
+ * `npm`'s [`semver`](https://www.npmjs.com/package/semver) module (and []`semver-extra`](https://www.npmjs.com/package/semver-extra))
  * to allow for tracking and auto-updating of vscode extensions from private git repos using semver maths.
  * 
  * For purposes of *this* module, tracking is done not via the actual contents of a module's `package.json`, but
@@ -44,38 +119,26 @@ const path = require('path');
  */
 const cp = require('child_process');
 /**
- * @private
  * @const {object} util `nodejs`'s built-in util module.
  */
 const util = require('util');
 /**
- * @private
  * @const {object} net `nodejs`'s built-in net module.
  */
 const net = require('net');
 /**
- * @private
  * @const {object} fs `nodejs`'s built-in fs module.
  */
 const fs = require('fs');
 
 /**
- * @protected
+ * @internal
  * @desc 
  * Perhaps I should go against the coding convensions of js coders everywhere and use capitalized var names for local scoped objects...
  * I mean I did in Frontiers.  Anyway, this is the closure-scoped var which holds the manager's state within vscode.
  */
 let taskState = { taskComplete: taskComplete};     // closure scoped like a boss :/
 
-/**
- * @protected
- * @desc
- * The activation event hook for this extension.  See vscode documentation for more details.  For this extension, its `activate()`
- * function only registers commands.
- * 
- * @registerCommand pvtExtMgr.checkExtensions The workhorse command of this extension.
- * @param {object} context 
- */
 function activate(context) {
   context.subscriptions.push(vscode.commands.registerCommand('pvtExtMgr.checkExtensions', function () {
     try {
@@ -138,12 +201,11 @@ function activate(context) {
 }
 exports.activate = activate;
 
-/**
- * @protected
- * @desc
- * Basic deactivation tasks for this extension.
- */
 function deactivate() {
+    if(taskState.statusBarItem) {
+        taskState.statusBarItem.hide();
+        taskState.statusBarItem = undefined;  // tots unnecessary, brah.
+    }
     taskState = undefined;
 }
 exports.deactivate = deactivate;
@@ -152,7 +214,6 @@ exports.deactivate = deactivate;
 
 
 /**
- * @protected
  * @desc
  * This is the work horse/top level entry point for this extension.  We take a list of extensions from the config settings
  * (the *vscode* settings that is) for this extension, written in a subset of the `npm` dependency format (we only accept
@@ -168,7 +229,6 @@ exports.deactivate = deactivate;
  * @param {object} _context The `context` object as passed into `activate()`
  * @futures
  * - We could accept a commitish specification as well, would be easy.
- * - This function should probably live on the task object itself.
  */
 function updateExtensions(_sExtPath) {
   // And then the extension mechanics...
@@ -269,6 +329,32 @@ function updateExtensions(_sExtPath) {
     });
   }
 
+  //#region tabled
+  //* We could update these in serially or in parallel
+  //- Build communication pipe
+  // We going to use this to prevent collision from different vscode instances..
+  // let pipeName = util.format("%s.%s", "vscode", "pvtExtMgr");
+  // process.env.TASK_PIPE = pipeName;
+  // let pipePath = util.format("\\\\.\\pipe\\%s", pipeName);
+
+  // // Setup server
+  // taskState.commChannel = net.createServer((_client) => {
+
+  // });
+
+  // let p = new Promise((resolve, reject) => {
+  //   taskState.commChannel.listen(pipePath, function() {
+  //     console.log("server started...");
+  //     resolve();
+  //   });
+
+  //   taskState.commChannel.on('error', (e) => {
+  //     console.log("Got error on server");
+  //     reject(e);
+  //   });
+  // });
+  //#endregion
+
   // serial setup
   let extNames = Object.getOwnPropertyNames(exts);
   taskState.count = extNames.length + 1;
@@ -279,7 +365,7 @@ function updateExtensions(_sExtPath) {
       if(taskState.inProgress !== true) {
         reject({ message: "Task no longer in progress" });
       } else {
-        if(_idx < extNames.length) {
+        if(_idx &lt; extNames.length) {
           taskState.current = _idx + 1;
           resolve(promiseToUpdate(extNames[_idx]).then((updated) => {
             if(updated) {
@@ -287,7 +373,7 @@ function updateExtensions(_sExtPath) {
             }
             // console.log(util.format("[%s done so then] : Doing next (idx:%s)", ext, _idx+1));
             let d = Date.now();
-            while(Date.now()-d < 1000) {
+            while(Date.now()-d &lt; 1000) {
               // Do nothing.  We're waiting.
             }
             return serialize(_idx+1, updated || _updAggregate);
@@ -306,8 +392,22 @@ function updateExtensions(_sExtPath) {
       }
     });
   }
+
+  // return p.then(() => { return serialize(0); });
   
   return serialize(0, false);
+  
+  // .then(() => { 
+  //   return new Promise(
+  //     (resolve, reject) => { 
+  //       setTimeout(() => { 
+  //         console.log("done"); 
+  //         taskState.commChannel.close(); 
+  //         resolve(); 
+  //       }, 5000);
+  //     }
+  //   );
+  // })
 
   // parallel
   // let updates = [];
@@ -324,10 +424,185 @@ function updateExtensions(_sExtPath) {
   // });  
 }
 
-/**
- * Internally, this function is called to signal a given task is complete.  
- * @protected
- */
 function taskComplete() {
   taskState.inProgress = false;
 }
+
+
+function promiseToUpdateEx(_extName) {
+  return new Promise((resolve, reject) => {
+    console.log(util.format("start %s", _extName));
+    taskState.progressBar.report({ increment: 100 / taskState.count, message: util.format("Updating %s", _extName) });
+    setTimeout(() => { 
+      console.log(util.format("finish %s", _extName));
+      resolve(_extName); 
+    }, 1000);
+  });
+}
+
+/**
+ * 
+ * @param {string} _extName 
+ * @deprecated Not using this pattern
+ */
+function viaEncodedCLI(_extName) {
+  return new Promise((resolve, reject) => {
+    let updProcess = cp.spawn(util.format("node updateExtension.js %s %s", encodeURI(_extName), encodeURI(extPath), encodeURI(exts[_extName])), { cwd: _context.extensionPath, stdio: "pipe", shell:true });
+    updProcess.stdout.on('data', (_data) => {
+      // console.log(_data.toString());
+      // process.stdout.write(_data);
+    });
+
+    updProcess.stderr.on('data', (_data) => {
+      console.error(_data.toString());
+      // process.stderr.write(_data);
+    });
+
+    //- catch completion
+    updProcess.on('exit', (_code, _signal) => {
+      // vscode.window.showInformationMessage()
+      resolve(updProcess);
+    });
+    updProcess.on('error', (_err) => {
+      vscode.window.showErrorMessage(util.format("PvtExtMgr: Error! (%s)", _err.message));
+      reject(_err);
+    });
+  });
+}</pre>
+    </article>
+</section>
+
+    
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	`Private Extension Manager` Copyright © 2018 Shin
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
+	
+		on Tue Oct 23rd 2018
+	
+	using the <a href="https://github.com/Shizen/shinstrap">shinstrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/shinstrap.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

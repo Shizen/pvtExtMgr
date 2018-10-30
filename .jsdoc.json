@@ -15,12 +15,13 @@
     "tutorials" : "design" 
   },
   "templates": {
-    "logoFile": "",
+    "logoFile": "img/shinworksBW.png",
+    "favicon": "shinworks.svg",
     "cleverLinks": false,
     "monospaceLinks": false,
     "dateFormat": "ddd MMM Do YYYY",
-    "outputSourceFiles": true,
-    "outputSourcePath": true,
+    "outputSourceFiles": false,
+    "outputSourcePath": false,
     "systemName": "pvtExtMgr",
     "footer": "",
     "copyright": "`Private Extension Manager` Copyright © 2018 Shin",
@@ -31,6 +32,48 @@
     "inverseNav": true,
     "protocol": "html://",
     "methodHeadingReturns": false,
-    "supplementalCSS": "local.css"
+    "supplementalCSS": "local.css",
+    "customizeOutput": {
+      "menus": {
+        "design": {
+          "title": "Design",
+          "access": "private",
+          "members": [ "DESIGN" ]
+        }
+      },
+      "container" : {
+        "article" : {
+          "overview": {
+            "all" : [ "description", "notes", "design", "algorithm", "*" ],
+            "tags": {
+              "design": {
+                "titleWrapper": "h5",
+                "titleWrapperAttributes": "class='jsdoc-design-title subsection-title'",
+                "wrapper": "div",
+                "wrapperAttributes" : "class=jsdoc-design-body"
+              },
+              "notes": {
+                "titleWrapper": "h5",
+                "titleWrapperAttributes": "class='jsdoc-notes-title subsection-title'",
+                "wrapper": "div",
+                "wrapperAttributes" : "class=jsdoc-notes-body"
+              },
+              "algorithm": {
+                "titleWrapper": "h5",
+                "titleWrapperAttributes": "class='jsdoc-algorithm-title subsection-title'",
+                "wrapper": "div",
+                "wrapperAttributes" : "class=jsdoc-algorithm-body"
+              }
+            }
+          },
+          "body": {
+            "all" : [ "*" ],
+            "tags" : {
+
+            }
+          }
+        }
+      }
+    }
   }
 }

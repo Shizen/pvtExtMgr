@@ -1,5 +1,7 @@
 node_modules
 .vscode-test/
 *.vsix
-docs/
+internaldocs/
 *.log
+scratch*
+ignorePatch*

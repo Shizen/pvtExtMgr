@@ -1,9 +1,23 @@
 {
     "name": "@shizen/pvtextmgr",
     "displayName": "Private Extension Manager",
-    "description": "Private extension manager for vscode",
+    "description": "Private extension manager for vscode--update extensions from private git servers",
+    "keywords": [
+      "extensionManager"
+    ],
     "version": "0.0.2-5",
     "publisher": "shinworks",
+    "author": {
+        "name": "Sean Simmons",
+        "email": "shin@shinworks.co",
+        "url": "http://www.shinworks.co"
+    },
+    "galleryBanner": {
+        "color": "#aaa",
+        "theme": "dark"
+    },
+    "icon": "Shinworks128.png",
+    "license": "SEE LICENSE IN LICENSE.txt",
     "engines": {
         "vscode": "^1.26.0"
     },
@@ -13,17 +27,16 @@
     "activationEvents": [
         "onCommand:pvtExtMgr.checkExtensions"
     ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/Shizen/pvtExtMgr"
+    },
     "main": "./extension",
     "contributes": {
         "configuration": {
             "type": "object",
             "title": "Private Extension Manager Configuration",
             "properties": {
-                "pvtExtMgr.runAsync": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "If set to true, pvtExtMgr will kick off each update task asyncronously.  Either way it will inform you when it's done"
-                },
                 "pvtExtMgr.keepLog": {
                     "type": "boolean",
                     "default": false,
@@ -31,7 +44,7 @@
                 },
                 "pvtExtMgr.clean": {
                     "type": "boolean",
-                    "default": false,
+                    "default": true,
                     "description": "If set to true, pvtExtMgr will perform a `git clean -f` on each repository"
                 },
                 "pvtExtMgr.extensions": {
@@ -50,13 +63,12 @@
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install",
-        "build-docs": "./node_modules/.bin/jsdoc -c ./.jsdoc.json -d docs/ -R README.md -r .",
+        "build-docs": "./node_modules/.bin/jsdoc -c ./.jsdoc.json -a 'public' -d docs/ -R README.md -r .",
+        "dev-docs": "./node_modules/.bin/jsdoc -c ./.jsdoc.json -a 'all' -d internaldocs/ -R README.md -r .",
+        "debug-dev-docs": "node --inspect-brk ./node_modules/jsdoc/jsdoc.js -c ./.jsdoc.json -a 'all' -d internaldocs/ -R README.md -r .",
         "debug-docs": "node --inspect-brk ./node_modules/jsdoc/jsdoc.js -c ./.jsdoc.json -d docs/ -R README.md -r ."
     },
     "devDependencies": {
-        "@shizen/jsdoc-shinmark": "git+ssh://git@34.214.193.247:/srv/git/jsdoc-shinmark.git",
-        "@shizen/jsdoc-tags": "git+ssh://git@34.214.193.247:/srv/git/jsdoc-tags.git",
-        "@shizen/shinstrap": "git+ssh://git@34.214.193.247:/srv/git/shinstrap.git",
         "@types/mocha": "^2.2.42",
         "@types/node": "^7.10.0",
         "eslint": "^4.11.0",

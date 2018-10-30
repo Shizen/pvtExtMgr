@@ -1,31 +1,44 @@
 
+
+#{ Pre-Release checklist
+
+- branch release and dev, clean/purge release  
+  The concept is to have a dev branch which we store on AWS, and a stripped, presentable version on github.  This is kind of a pita, though, if one imagines actually stripping comments by hand every time.  So, really I'd want to strip designated internal comments as mentioned... Because doing a separate clean is rediculous.  Ok.  But I don't have this facility at the moment.  So leave the various comments in?
+
+  //. mumble.  Trouble is I can't easily ctrl-/ such things.  I could strip all non // comments, but that seems "bad".  Basically I want a comment vs. an ignore.
+  I can implement this by basically saying, ctrl-/ will insert `///` instead of `//` and `///` is ignore.  I could instead try to alter my patterns and reserve `//` for ignore and `/* */` for comments, but I think this is probably unwise.
+
+  Ideally, tools like `git` would also *ignore* ignore-lines, so a file with differing `///` would still be considered the same, so long as everything else was the same--so I could have my `///` and someone else could have their own `///` comments.  The merge/move/floating aspects would be rough.  bother.
+
+}
+
 #{ ToDo
 
-- Assuming the above two tests work, I need documentation and testing.  Top of the list is security issues, because, like.. we're not doing anything there.
 - Convert my `execSync` calls to async calls and leverage gitExecSync.  Each individual extension test can be "forked" in its own async process, but within a process, it's easier to use gitExecFauxSync, or whatever I'm calling it.  That is probably in grunt build tasks, which tells me that I probably want to move it out into a more generic lib.  Even grunt-utils turns out to be too narrow in naming.  I should probably fix that.
 - debounce
-- feedback that update is in progress
-- reload extensions (in all open vscode instances)
-- validate that `git` and `npm` are installed/in path
+- reload extensions (in all open vscode instances) -- A little controversial.  I'd have to open a second named pipe to communicate between my various extensions in each vscode instance, which feels a bit like using napalm to swat a fly, but...  It *would* work.  Also would require that this extension always be active in every vscode instance.
+- Validation & Robustness
+  - validate that `git` and `npm` are installed/in path
   - verify that the extension in question is an npm module under git.
+  - security and access perms
 
 Features
 
 - allow commitish format (e.g. #master)
-- could set up a communication channel between the various workers and myself, but that seems like overkill.  It *would* allow me to "easily" relay update information from the various threads to the main.
+- could set up a communication channel between the various workers and myself, but that seems like overkill.  It *would* allow me to "easily" relay update information from the various threads to the main.  Also using a named pipe would allow debouncing between vscode instances.
 
 }
 
 #{ Links
 
 - [semver](https://www.npmjs.com/package/semver)
+- [semver-extra](https://www.npmjs.com/package/semver-extra)
 
 }
 
 # Private Extension Manager
 
 The idea behind this vscode extension is to allow for the management and automatic updating of vscode extensions from one or more private github servers.  To this end, I would have a setting in the extension which would look similar to a package's dependency list (in format), utilizing the github format.  Ideally I'd use the exact same semver math and code as npmm, utilizing the same tagging semantics for githubs in pulling the extensions.
-
 
 ## Design Decisions and Debates
 
