@@ -15,8 +15,8 @@
     "tutorials" : "design" 
   },
   "templates": {
-    "logoFile": "img/shinworksBW.png",
-    "favicon": "shinworks.svg",
+    "logoFile": "img/ShinworksBW.png",
+    "favicon": "Shinworks.svg",
     "cleverLinks": false,
     "monospaceLinks": false,
     "dateFormat": "ddd MMM Do YYYY",
