@@ -1,7 +1,6 @@
 # Change Log
-All notable changes to the "pvtExtMgr" extension will be documented in this file.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+Changes to the "pvtExtMgr" extension will be documented in this file (one hopes).
 
-## [Unreleased]
+## [0.0.2] - 10/30/2018
 - Initial release
