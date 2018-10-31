@@ -1,5 +1,5 @@
 {
-    "name": "@shizen/pvtextmgr",
+    "name": "pvtextmgr",
     "displayName": "Private Extension Manager",
     "description": "Private extension manager for vscode--update extensions from private git servers",
     "keywords": [
