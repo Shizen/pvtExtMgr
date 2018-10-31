@@ -1,5 +1,5 @@
 
-<base href="https://shizen.github.io/pvtExtMgr">
+<base href="https://shizen.github.io/pvtExtMgr/">
 
 [Test link](index.html)
 
