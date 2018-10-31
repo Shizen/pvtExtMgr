@@ -1,7 +1,4 @@
 
-
-[Test link](index.html)
-
 # pvtExtMgr (Private Extension Manager)
 
 The purpose of this extension is to allow you to setup and maintain extensions for your vscode installation which are "automatically" kept up to date with a \[private\] git server.  To this end, this module follows the same pattern as `npm` for specifying and tracking versions of npm modules\*.  This module allows the user to specify in this module's settings a `dependencies`-like list of `#semver` npm references to a git server and semver version specification for the desired version of the extension they would like to have installed.  The primary goal is to support user developed and private extensions in vscode.  
