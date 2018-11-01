@@ -13,8 +13,8 @@
         "url": "http://www.shinworks.co"
     },
     "galleryBanner": {
-        "color": "#aaa",
-        "theme": "dark"
+        "color": "#ddd",
+        "theme": "light"
     },
     "icon": "Shinworks128.png",
     "license": "SEE LICENSE IN LICENSE.txt",

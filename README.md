@@ -12,10 +12,6 @@ Note that the actual semver math is done by [`semver-extra`](https://www.npmjs.c
 - Allows the user to trigger (manually for the moment), the checking for updates to extensions stored in git repos according the user settings for this extension.
 - Can be made to keep a log of updates performed.
 
-## Known Issues
-
-- Sanitation of "private" ip addresses and the like has caused certain dev related facilities to fall down.
-
 ## Requirements
 
 This extension requires that the user already have `git` and `npm` installed and included in their path.
@@ -41,6 +37,7 @@ This setting does extend the `#semver` format to add `prerelease` and `latest` a
 
 ## Known Issues
 
+- Sanitation of "private" ip addresses and the like has caused certain dev related facilities to fall down.
 - I currently "update" extensions via fetch + checkout.  (which will `fetch` all branches of the given repos).
 - Does not verify that the user has permissions to update the extension(s) in question.  To be clear, here I mean perms to modify the local file system.  This falls under error handling & robustness
 - This module does not debounce for multiple instances.  By which I mean that it does not deal gracefully with the situation where a user has multiple instances of vscode open and executes an update from each of them at "the same time".  (Which is why this extension is setup currently to be triggered manually).

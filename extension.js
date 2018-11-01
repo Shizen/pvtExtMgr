@@ -28,6 +28,7 @@
  */
 let m;  // hax to trick vscode's intellisense
 
+
 /**
  * @const {object} vscode visual studio codes's built in api object.
  * @private
