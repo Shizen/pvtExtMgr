@@ -37,6 +37,8 @@ This setting does extend the `#semver` format to add `prerelease` and `latest` a
 
 ## Known Issues
 
+Listed below are my known issues for this project.  If you have a comment, suggestion, request or other input on this project, please ask a question or leave a comment on the [vscode marketplace page for this project](https://marketplace.visualstudio.com/items?itemName=Shinworks.pvtextmgr).  If you encounter an issue, even one listed here, and would like to see it fixed, please go to the [github issues](https://github.com/Shizen/pvtExtMgr/issues) tracker and file an issue.  This project is very much in an "on demand" mode.  If there is no demand, only issues which bother me sufficiently in contrast to my available time will actually get addressed.
+
 - Sanitation of "private" ip addresses and the like has caused certain dev related facilities to fall down.
 - I currently "update" extensions via fetch + checkout.  (which will `fetch` all branches of the given repos).
 - Does not verify that the user has permissions to update the extension(s) in question.  To be clear, here I mean perms to modify the local file system.  This falls under error handling & robustness
